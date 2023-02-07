@@ -10,3 +10,28 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.app-container {
+  height: 100vh;
+}
+.responsive-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.game-play-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+}
+.score-timer-container {
+  display: flex;
+}
+.timer-container {
+  display: flex;
+}

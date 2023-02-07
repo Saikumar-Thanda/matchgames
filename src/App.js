@@ -1,11 +1,16 @@
+import {Component} from 'react'
 import './App.css'
+import TabList from './Components/TabList'
+import ImageTabList from './Components/ImageTabList'
 
-// These are the lists used in the application. You can move them to any component needed.
 const tabsList = [
   {tabId: 'FRUIT', displayText: 'Fruits'},
   {tabId: 'ANIMAL', displayText: 'Animals'},
   {tabId: 'PLACE', displayText: 'Places'},
 ]
+
+const webLogoUrl =
+  'https://assets.ccbp.in/frontend/react-js/match-game-website-logo.png'
 const imagesList = [
   {
     id: 'b11ec8ce-35c9-4d67-a7f7-07516d0d8186',
@@ -246,7 +251,148 @@ const imagesList = [
   },
 ]
 
-// Replace your code here
-const App = () => <div>Hello World</div>
+const initialState = {
+  isGamePlaying: true,
+  score: 0,
+  timeLimitInSeconds: 60,
+  activeImageUrl: imagesList[0].imageUrl,
+  activeTabId: tabsList[0].tabId,
+}
+
+class App extends Component {
+  state = initialState
+
+  componentDidMount() {
+    this.setIntervalTime()
+  }
+
+  getFilteredList = () => {
+    const filteredList = imagesList.filter(each => {
+      const {activeTabId} = this.state
+
+      return each.category === activeTabId
+    })
+    return filteredList
+  }
+
+  setIntervalTime = () => {
+    this.timerId = setInterval(this.decreaseTime, 1000)
+  }
+
+  decreaseTime = () => {
+    const {timeLimitInSeconds, isGamePlaying} = this.state
+    if (timeLimitInSeconds > 0) {
+      this.setState({timeLimitInSeconds: timeLimitInSeconds - 1})
+    } else {
+      clearInterval(this.timerId)
+      this.setState({isGamePlaying: !isGamePlaying})
+    }
+  }
+
+  onChangeThumbnail = imageUrl => {
+    const {activeImageUrl, score, isGamePlaying} = this.state
+    const newActiveImageUrlIndex = Math.ceil(
+      Math.random() * imagesList.length - 1,
+    )
+    if (activeImageUrl === imageUrl) {
+      this.setState({
+        activeImageUrl: imagesList[newActiveImageUrlIndex].imageUrl,
+        score: score + 1,
+      })
+    } else {
+      this.setState({isGamePlaying: !isGamePlaying})
+      clearInterval(this.timerId)
+    }
+  }
+
+  onClickTab = id => {
+    this.setState({activeTabId: id})
+  }
+
+  onPlayAgain = () => {
+    this.setState({...initialState})
+    this.setIntervalTime()
+  }
+
+  renderPlayingView = () => {
+    const filteredList = this.getFilteredList()
+    const {timeLimitInSeconds, score, activeImageUrl, activeTabId} = this.state
+    return (
+      <div className="match-game-container">
+        <nav className="nav-header">
+          <img className="match-image" src={webLogoUrl} alt="website logo" />
+          <ul>
+            <div className="score-timer-container">
+              <li>
+                <p>
+                  Score:<span>{score}</span>
+                </p>
+              </li>
+              <li className="timer-container">
+                <img
+                  src="https://assets.ccbp.in/frontend/react-js/match-game-timer-img.png"
+                  alt="timer"
+                />
+                <p>{timeLimitInSeconds} sec</p>
+              </li>
+            </div>
+          </ul>
+        </nav>
+        <img src={activeImageUrl} alt="match" />
+        <ul>
+          {tabsList.map(each => (
+            <TabList
+              key={each.tabId}
+              tabDetails={each}
+              isActive={activeTabId === each.tabId}
+              onClickTab={this.onClickTab}
+            />
+          ))}
+        </ul>
+        <ul>
+          {filteredList.map(eachImageObject => (
+            <ImageTabList
+              imageList={eachImageObject}
+              key={eachImageObject.id}
+              onChangeThumbnail={this.onChangeThumbnail}
+            />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  renderEndView = () => {
+    const {score} = this.state
+    return (
+      <div className="bg-end-view">
+        <img
+          src="https://assets.ccbp.in/frontend/react-js/match-game-trophy.png"
+          alt="trophy"
+        />
+        <p>YOUR SCORE</p>
+        <p>{score}</p>
+        <button type="button" onClick={this.onPlayAgain}>
+          <img
+            src="https://assets.ccbp.in/frontend/react-js/match-game-play-again-img.png"
+            alt="reset"
+          />
+          PLAY AGAIN
+        </button>
+      </div>
+    )
+  }
+
+  render() {
+    const {isGamePlaying} = this.state
+    return (
+      <div className="app-container">
+        <div className="responsive-container">
+          {isGamePlaying ? this.renderPlayingView() : this.renderEndView()}
+        </div>
+      </div>
+    )
+  }
+}
 
 export default App
